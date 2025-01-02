@@ -66,7 +66,7 @@ def create_dataset(dataset, look_back=1):
 #         dataY.append(dataset[i + look_back + 1, 0])  # Предсказываем значение через одно
 #     return np.array(dataX), np.array(dataY)
 
-look_back = 240
+look_back = 240                           #начать с 30 и постепенно увеличивать до 240
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
 
