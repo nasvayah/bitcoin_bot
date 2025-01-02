@@ -66,8 +66,8 @@ model.add(LSTM(25, input_shape=(look_back, 1)))
 model.add(Dropout(0.1))
 model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
-early_stopping = EarlyStopping(monitor='loss', patience=5, restore_best_weights=True)
-model.fit(trainX, trainY, epochs=1, batch_size=240, verbose=1,callbacks=[early_stopping])
+early_stopping = EarlyStopping(monitor='loss', patience=100, restore_best_weights=True)
+model.fit(trainX, trainY, epochs=100, batch_size=240, verbose=1,callbacks=[early_stopping])
 
 
 
@@ -101,8 +101,8 @@ testPredictPlot[:, :] = np.nan
 testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
 
 # plot baseline and predictions
-plt.plot(scaler.inverse_transform(dataset))
-plt.plot(trainPredictPlot)
+plt.plot(scaler.inverse_transform(dataset)[-100:])
+#plt.plot(trainPredictPlot[-100:])
 print('testPrices:')
 testPrices=scaler.inverse_transform(dataset[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :])
 print(len(testPrices))
@@ -117,8 +117,10 @@ testPrices = testPrices[:len(testPredict)]
 df = pd.DataFrame(data={"prediction": np.around(list(testPredict.reshape(-1)), decimals=2), "test_price": np.around(list(testPrices.reshape(-1)), decimals=2)})
 df.to_csv("lstm_result.csv", sep=';', index=None)
 
+joblib.dump(model, 'models/rnn_best_model.pkl')
+
 # plot the actual price, prediction in test data=red line, actual price=blue line
-plt.plot(testPredictPlot) 
+plt.plot(testPredictPlot[-100:]) 
 plt.savefig(f'foolstm.png')
 plt.show()
 
