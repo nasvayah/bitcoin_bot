@@ -57,6 +57,15 @@ def create_dataset(dataset, look_back=1):
         dataY.append(dataset[i + look_back, 0])  # Предсказываем только closePrice
     return np.array(dataX), np.array(dataY)
 
+# # Функция для создания набора данных -------------- если через одно
+# def create_dataset(dataset, look_back=1):
+#     dataX, dataY = [], []
+#     for i in range(len(dataset) - look_back - 2):  # Измените здесь на -2
+#         a = dataset[i:(i + look_back), :]
+#         dataX.append(a)
+#         dataY.append(dataset[i + look_back + 1, 0])  # Предсказываем значение через одно
+#     return np.array(dataX), np.array(dataY)
+
 look_back = 240
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
