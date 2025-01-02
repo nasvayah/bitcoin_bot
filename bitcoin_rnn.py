@@ -4,41 +4,41 @@ from data_prepare import * # Assumes this imports your data preparation function
 
 
 
+
 def model_(look_back=24, shift_=15):
-    X_train, X_test, y_train, y_test, scalerX, scalery, test_indices, data  = prepare_data_for_lstm(look_back, shift_)
+    X_train, X_test, y_train, y_test, scalerX, scalery, test_indices  = prepare_data_for_lstm(look_back, shift_)
 
     # Create LSTM model
     model = Sequential()
-    model.add(LSTM(units=100, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2])))
+    
+
+    model.add(LSTM(units=200, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2]), kernel_regularizer=l2(0.01)))
     model.add(Dropout(0.2))
-    model.add(LSTM(units=100))
+    model.add(LSTM(units=100, return_sequences=True, kernel_regularizer=l2(0.01)))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=100, return_sequences=False, kernel_regularizer=l2(0.01)))
     model.add(Dropout(0.2))
     model.add(Dense(1))
 
+
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(X_train, y_train, epochs=5, batch_size=32, verbose=1)  # Increase epochs if needed
+    
+
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=1, validation_split=0.2, callbacks=[early_stopping])
 
     # Predict
     y_pred = model.predict(X_test)
-    print(y_pred)
 
 
-    # Inverse transform to get percentage change values
-    y_test_percentage = scalery.inverse_transform(y_test)
-    y_pred_percentage = scalery.inverse_transform(y_pred)
 
-    # Ensure y_test_percentage and y_pred_percentage are 1-dimensional
-    y_test_percentage = y_test_percentage.flatten()
-    y_pred_percentage = y_pred_percentage.flatten()
+    # Inverse transform to get actual price values
+    y_test_original = scalery.inverse_transform(y_test)
+    y_pred_original = scalery.inverse_transform(y_pred)
 
-
-        # Calculate the actual prices from the percentage change
-    y_test_original = []
-    y_pred_original = []
-    for i in range(len(y_test_percentage)):
-        actual_price = data.iloc[look_back + len(X_train) + i]['closePrice']
-        y_test_original.append(actual_price * (1 + y_test_percentage[i] / 100))
-        y_pred_original.append(actual_price * (1 + y_pred_percentage[i] / 100))
+        # Ensure y_test_original and y_pred_original are 1-dimensional
+    y_test_original = y_test_original.flatten()
+    y_pred_original = y_pred_original.flatten()
 
 
     predictions = pd.DataFrame({
@@ -57,3 +57,5 @@ def model_(look_back=24, shift_=15):
 
 if __name__ == '__main__':
     model_(24, 15)
+
+

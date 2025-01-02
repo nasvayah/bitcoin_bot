@@ -13,3 +13,6 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from sklearn.model_selection import TimeSeriesSplit
+from sklearn.preprocessing import RobustScaler, StandardScaler
+from keras.callbacks import EarlyStopping
+from keras.regularizers import l2

@@ -4,13 +4,14 @@ from data_prepare import *
 
 def model_(shift_):
     X_train, X_test, y_train, y_test = data_prepare_for_rf_or_gb(shift_)
+    
     train_error = []
     test_error = []
     minDepth = 40
     maxDepth = 45
     models = []
     for depth in range(minDepth,maxDepth , 5):
-        regr = RandomForestRegressor(max_depth=depth, random_state=0, n_estimators=200, verbose=2, n_jobs=-1, min_samples_split=5, min_samples_leaf=4)
+        regr = RandomForestRegressor(max_depth=depth, random_state=0, n_estimators=50, verbose=2, n_jobs=-1, min_samples_split=5, min_samples_leaf=4)
         regr.fit(X_train, y_train)
         models.append(regr)
         tr_error = math.sqrt(mean_squared_error(regr.predict(X_train), y_train))

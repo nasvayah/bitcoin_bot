@@ -27,6 +27,8 @@ def data_process(shift_=15):
         data[f'PriceClose{shift_}M'] = data['closePrice'].shift(-shift_//15)
         data = data[:-shift_//15]
 
+
+
     def add_datepart(df, fldname, drop=True, time=False, errors="raise"):
         fld = df[fldname]
         fld_dtype = fld.dtype
@@ -98,8 +100,10 @@ def data_prepare_for_rf_or_gb(shift_=15):
 
     predictColumn = f'PriceClose{shift_}M'
 
+
     data_process(shift_)
     data = pd.read_csv(f'BTCUSDT_processed/BTCUSDT_processed{shift_}.csv',sep=';')
+
  
         # Установка индекс по дате
     data.set_index('startTime', inplace=True)
@@ -115,6 +119,10 @@ def data_prepare_for_rf_or_gb(shift_=15):
     return X_train, X_test, y_train, y_test 
 
 
+
+
+
+
 def prepare_data_for_lstm(look_back=24, shift_=15): #look_back is the number of past hours to use as input for each prediction.
     # Load data
     data_process(shift_)
@@ -128,12 +136,6 @@ def prepare_data_for_lstm(look_back=24, shift_=15): #look_back is the number of 
                     'startTimeIs_month_end', 'startTimeIs_month_start', 'startTimeIs_quarter_end', 'startTimeIs_quarter_start',
                     'startTimeIs_year_end', 'startTimeIs_year_start', 'RSI', 'MACD_Line', 'MACD_Signal']
     predictColumn = f'PriceClose{shift_}M'
-
-        # Calculate percentage change
-    data['percentage_change'] = ((data[predictColumn] - data['closePrice'] )/data['closePrice'])* 100
-    predictColumn = 'percentage_change'
-    #data.dropna(inplace=True)  # Drop NaN values created by pct_change
-
 
     # Handle missing data (check if any exist after running data_prepare)
     data.fillna(method='ffill', inplace=True)
@@ -162,21 +164,12 @@ def prepare_data_for_lstm(look_back=24, shift_=15): #look_back is the number of 
         y.append(scaled_data_y[i])
     X, y = np.array(X), np.array(y)
 
-    # # Time series split
-    # tscv = TimeSeriesSplit(n_splits=5)
-    # train_index, test_index = list(tscv.split(X))[0] # Using only the first split. Adjust if needed
-
-    # X_train, X_test = X[train_index], X[test_index]
-    # y_train, y_test = y[train_index], y[test_index]
 
         # Split data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.01, shuffle=False)
 
 
-    # # Save the test indices for later use
-    # test_indices = data.index[look_back + len(train_index):look_back + len(train_index) + len(test_index)]
-
         # Save the test indices for later use
     test_indices = data.index[look_back + len(X_train):look_back + len(X_train) + len(X_test)]
 
-    return X_train, X_test, y_train, y_test, scalerX, scalery, test_indices, data
+    return X_train, X_test, y_train, y_test, scalerX, scalery, test_indices
